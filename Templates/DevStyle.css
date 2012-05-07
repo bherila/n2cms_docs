@@ -1,0 +1,13 @@
+@charset "utf-8";
+/* CSS Document */
+
+body { background: #EEE; font-family: Segoe UI, Tahoma, Geneva, sans-serif; font-size: 10pt; line-height: 120%; }
+.N2_Zone { background: #fff; border: 1px solid #666; padding: 0 14px; }
+#Left { float: left; width: 200px; padding-top: 14px; }
+#Content { margin-left: 220px; max-width: 800px; }
+
+h1 { font-size: 20pt; font-weight: 100; }
+h2 { font-size: 15pt; font-weight: 100; }
+h3 { font-size: 13pt; font-weight: 100; }
+
+.inline-image { padding: 14px; text-align: center; }

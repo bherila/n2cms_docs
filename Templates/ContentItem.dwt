@@ -1,0 +1,40 @@
+<html>
+<head>
+
+<!-- map title tag to page's Title property -->
+<meta name="N2:MapProperty" name="title -> Title" />
+
+<meta name="N2:ZoneSelector" name=".N2_Zone" />
+<meta name="N2:PartSelector" name=".N2_Part" />
+<meta name="N2:AttributeSelector" name=".N2_Attribute" />
+
+<!-- TemplateBeginEditable name="doctitle" -->
+<title>Test</title>
+<!-- TemplateEndEditable -->
+
+<meta name="N2:ShowNav" value="true" />
+<meta name="N2:ShowTitle" value="false" />
+<meta name="N2:Type" value="TextPage" />
+
+<!-- TemplateBeginEditable name="head" -->
+<!-- TemplateEndEditable -->
+<link rel="stylesheet" type="text/css" href="/Templates/DevStyle.css">
+</head>
+<body>
+<div class="N2_Zone" id="Left">
+    
+</div>
+
+<div class="N2_Zone" id="Content">
+
+    <div class="N2_Part RawHTML" id="Content_01">
+        <div class="N2_Attribute Text">
+            <!-- TemplateBeginEditable name="body" -->
+            
+            <!-- TemplateEndEditable -->
+        </div>
+    </div>		
+    
+</div>
+</body>
+</html>
