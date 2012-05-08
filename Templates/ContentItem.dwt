@@ -7,6 +7,7 @@
 <meta name="N2:ZoneSelector" name=".N2_Zone" />
 <meta name="N2:PartSelector" name=".N2_Part" />
 <meta name="N2:AttributeSelector" name=".N2_Attribute" />
+<meta name="N2:IgnoreSelector" name=".N2_Ignore" />
 
 <!-- TemplateBeginEditable name="doctitle" -->
 <title>Test</title>
@@ -22,13 +23,17 @@
 </head>
 <body>
 <div class="N2_Zone" id="Left">
-    
+<div class="N2_Ignore">
+<!-- begin N2 navigation -- DO NOT EDIT BELOW THIS LINE -->
+<!--#include virtual="/@N2_SSI.html" -->
+<!-- end N2 navigation -- DO NOT EDIT ABOVE THIS LINE -->
+</div>
 </div>
 
 <div class="N2_Zone" id="Content">
 
     <div class="N2_Part RawHTML" id="Content_01">
-        <div class="N2_Attribute Text">
+        <div class="N2_Attribute Text"> 
             <!-- TemplateBeginEditable name="body" -->
             
             <!-- TemplateEndEditable -->
