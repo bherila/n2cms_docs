@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Disabling and adding Toolbar Options</title>
+</head>
+<body>
+	<h1>Disabling and adding Toolbar Options</h1>
+	<p>N2 CMS allows developers to disable built-in toolbar options, control panel options and right-click options from configuration. New items can be added via attributes in code.</p>
+	<h2>Adding options</h2>
+	<p>Options can be added in the toolbar, context-menu and control panel.</p>
+	<h3>Adding tolbar option</h3>
+	<p>Adds a toolbar item to the management UI.</p>
+	<code><pre>
+    [ToolbarPlugin("My", "my", "/Path/to/my/page.aspx?{Selection.SelectedQueryKey}={Selected.Path}", ToolbarArea.Preview, Targets.Preview, "{IconsUrl}/world.png", 2000, 
+		ToolTip = "My stuff",
+		GlobalResourceClassName = "Toolbar")]
+	public partial class MyPageDefault : EditPage
+	{
+	}
+	</pre></code>
+	<h3>Adding context-menu option</h3>
+	<p>Adds a context-menu option to the tree in the management UI.</p>
+	<code><pre>
+	[NavigationSeparatorPlugin("doSeparator", 5000)]
+	[NavigationLinkPlugin("Do", "do", "http://anywhere.com/", ToolbarArea.Preview, "{IconsUrl}/page_copy.png", 5001,
+		GlobalResourceClassName = "Navigation",
+		RequiredPermission = Permission.Read)]
+	public partial class MyPageDefault : EditPage
+	{
+	}
+	</pre></code>
+	<h3>Adding control panel option</h3>
+	<p>Adds a control panel option (in the sliding curtain) to pages on web site.</p>
+	<code><pre>
+	[ControlPanelLink("myCP", "{IconsUrl}/application_side_expand.png", "/Path/to/page.aspx?{Selection.SelectedQueryKey}={Selected.Path}", "Open my", 5000, ControlPanelState.Visible,
+	Target = Targets.Top,
+	RequiredPermission = Permission.Write)]
+	public partial class MyPageDefault : EditPage
+	{
+	}
+	</pre></code>
+	<h2>Disabling options</h2>
+	<p>This configuration would disable all toolbar, context-menu and control panel options available by default in N2 CMS 2.3.</p>
+	<textarea>
+	<n2>
+		<engine>
+			<interfacePlugins>
+				<!-- toolbar -->
+				<remove name="copy"/>
+				<remove name="tree"/>
+				<remove name="preview"/>
+				<remove name="delete"/>
+				<remove name="edit"/>
+				<remove name="site"/>
+				<remove name="globalization"/>
+				<remove name="move"/>
+				<remove name="new"/>
+				<remove name="paste"/>
+				<remove name="templates"/>
+				<remove name="versions"/>
+				<remove name="wizard"/>
+				<remove name="filemanager"/>
+				<remove name="home"/>
+				<remove name="users" />
+				<remove name="security" />
+				<remove name="bulk" />
+				<remove name="linktracker" />
+				<remove name="sort" />
+				<remove name="settings" />
+				<remove name="search" />
+				<remove name="translate" />
+				<!-- context menu -->
+				<remove name="cpOrganize" />
+				<remove name="cpUnorganize" />
+				<remove name="cpEditingSave" />
+				<remove name="cpPreviewDiscard" />
+				<remove name="cpPreviewPublish" />
+				<remove name="cpAdminister" />
+				<remove name="cpView" />
+				<remove name="cpDelete" />
+				<remove name="cpEdit" />
+				<remove name="cpEditPreview" />
+				<remove name="cpEditingCancel" />
+				<remove name="cpNew" />
+				<remove name="cpPendingVersion" />
+				<remove name="cpNew" />
+				<remove name="cpNew" />
+			</interfacePlugins>
+		</engine>
+	</n2>
+	</textarea>
+</body>
+</html>
