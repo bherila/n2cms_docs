@@ -2,12 +2,12 @@
 <head>
 
 <!-- map title tag to page's Title property -->
-<meta name="N2:MapProperty" name="title -> Title" />
+<meta name="N2:MapProperty" value="title -> Title" />
 
-<meta name="N2:ZoneSelector" name=".N2_Zone" />
-<meta name="N2:PartSelector" name=".N2_Part" />
-<meta name="N2:AttributeSelector" name=".N2_Attribute" />
-<meta name="N2:IgnoreSelector" name=".N2_Ignore" />
+<meta name="N2:ZoneSelector" value=".N2_Zone" />
+<meta name="N2:PartSelector" value=".N2_Part" />
+<meta name="N2:AttributeSelector" value=".N2_Attribute" />
+<meta name="N2:IgnoreSelector" value=".N2_Ignore" />
 
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>Downloading N2</title>
@@ -19,14 +19,14 @@
 
 <!-- InstanceBeginEditable name="head" -->
 	<!-- InstanceEndEditable -->
-<link rel="stylesheet" type="text/css" href="/Templates/DevStyle.css">
+<link rel="stylesheet" type="text/css" href="/Templates/DevStyle.css" />
 </head>
 <body>
 <div class="N2_Zone" id="Left">
 <div class="N2_Ignore">
-<!-- begin N2 navigation -- DO NOT EDIT BELOW THIS LINE -->
+<!-- begin N2 navigation - DO NOT EDIT BELOW THIS LINE -->
 <!--#include virtual="/N2_SSI.html" -->
-<!-- end N2 navigation -- DO NOT EDIT ABOVE THIS LINE -->
+<!-- end N2 navigation - DO NOT EDIT ABOVE THIS LINE -->
 </div>
 </div>
 
@@ -76,8 +76,10 @@
 <h3>Getting up and Running</h3>
 <p>Each package contains one or more Visual Studio Solution (*.sln) files. Open the Solution file for what you want to run, and edit the web.config file to use the database engine of your choosing. Invoke the Run command in Visual Studio to launch a development web server with N2 running inside. You should see the setup wizard right away. </p>
 <p>The next step is to either <strong>start using N2</strong> and begin building your content using the pre-defined templates, or <strong>start developing with N2</strong> to customize the system to suit your needs. Most users will want to do at least some development and customization as every website has different needs and the templates don't cover every possible scenario that can be achieved with N2 CMS. </p>
-<p>Updating N2CMS</p>
+<h3>Updating N2CMS</h3>
 <p>After you've installed N2CMS in one of these ways, you will want to update it from time to time to take advantage of the latest features, security patches, and other updates. If you opted to use the Nuget deployment model, the Nuget packages will be updated periodically, and you can update using the built-in Nuget update mechanism to update your local instance of N2CMS. If you chose the Git deployment model, you can use <strong>git pull</strong> to get the latest updates in your own Git repository. </p>
+<h2>Server Environment</h2>
+<p>N2CMS is designed to run on Windows using ASP.NET and the WebForms and MVC frameworks. More information is available on the <a href="/Documentation/Getting Started/02 Server Requirements.html">Server Requirements</a> page. </p>
           <!-- InstanceEndEditable -->
         </div>
     </div>		

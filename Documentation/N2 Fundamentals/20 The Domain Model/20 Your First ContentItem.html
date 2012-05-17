@@ -2,12 +2,12 @@
 <head>
 
 <!-- map title tag to page's Title property -->
-<meta name="N2:MapProperty" name="title -> Title" />
+<meta name="N2:MapProperty" value="title -> Title" />
 
-<meta name="N2:ZoneSelector" name=".N2_Zone" />
-<meta name="N2:PartSelector" name=".N2_Part" />
-<meta name="N2:AttributeSelector" name=".N2_Attribute" />
-<meta name="N2:IgnoreSelector" name=".N2_Ignore" />
+<meta name="N2:ZoneSelector" value=".N2_Zone" />
+<meta name="N2:PartSelector" value=".N2_Part" />
+<meta name="N2:AttributeSelector" value=".N2_Attribute" />
+<meta name="N2:IgnoreSelector" value=".N2_Ignore" />
 
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>Test</title>
@@ -19,14 +19,14 @@
 
 <!-- InstanceBeginEditable name="head" -->
 <!-- InstanceEndEditable -->
-<link rel="stylesheet" type="text/css" href="/Templates/DevStyle.css">
+<link rel="stylesheet" type="text/css" href="/Templates/DevStyle.css" />
 </head>
 <body>
 <div class="N2_Zone" id="Left">
 <div class="N2_Ignore">
-<!-- begin N2 navigation -- DO NOT EDIT BELOW THIS LINE -->
+<!-- begin N2 navigation - DO NOT EDIT BELOW THIS LINE -->
 <!--#include virtual="/N2_SSI.html" -->
-<!-- end N2 navigation -- DO NOT EDIT ABOVE THIS LINE -->
+<!-- end N2 navigation - DO NOT EDIT ABOVE THIS LINE -->
 </div>
 </div>
 
@@ -34,7 +34,7 @@
 
     <div class="N2_Part RawHTML" id="Content_01">
         <div class="N2_Attribute Text"> 
-          <!-- InstanceBeginEditable name="body" -->
+            <!-- InstanceBeginEditable name="body" -->
             <h1>Your First ContentItem</h1>
             <p>Let's create a simple page type. We'll call this a <em>TextPage</em>, and as such we will create a corresponding class called <em>TextPage</em>. This is what <em>TextPage</em> looks like: </p>
 <pre>using N2.Details;
@@ -59,7 +59,7 @@ public class TextPage : ContentItem
               <li>public virtual string Url { get; }</li>
               <li>public virtual int VersionIndex { get; set; }</li>
             </ul>
-            <p>Note that none of these methods are <strong>abstract</strong>. Thus, you can see that N2 does a lot of the work for you. N2 takes care of versioning, managing URLs (though you can customize them), children, templates, modification and creation times, and more. Also note that all of these methods and properties are <strong>virtual</strong>; thus, you can override any of them in your own subclass to completely customize N2 to your exact needs. We won't do any customization right now, but we did want to point out this highly flexible engineering model. </p>
+            <p>Note that none of these methods are <strong>abstract</strong>: meaning, there is a default implementation available to you in the N2 framework.  Thus, you can see that N2 does a lot of the work for you. N2 takes care of versioning, managing URLs (though you can customize them), children, templates, modification and creation times, and more. Also note that all of these methods and properties are <strong>virtual</strong>; in other words, you can override any of them in your own subclass to completely customize N2 to your exact needs. We won't do any customization right now, but we did want to point out this highly flexible engineering model. </p>
 <h3>Make it a Page</h3>
             <p>In N2, every piece of content -- whether it's a page, part, or data entity -- is a ContentItem. Therefore, we need to let N2 know that we actually want to create a page. Pages in N2 implement the IPage interface, which is simply a marker interface. In other words, IPage doesn't actually define any methods or properties.  <strong><em>Note: At this point we've basically built AbstractPage, which is a base class for all pages used in the Webforms template pack. </em></strong></p>
 <h3>Defining Additional Properties</h3>
