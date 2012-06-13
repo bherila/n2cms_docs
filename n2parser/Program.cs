@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace n2parser
 {
@@ -25,6 +26,9 @@ namespace n2parser
         }
     }
 
+
+
+    
     class Program
     {
         class ParseOptions
@@ -97,84 +101,143 @@ namespace n2parser
             }
 
             Console.WriteLine("Found N2 documentation root at {0}", dir);
-            List<string> docFiles = GetFiles(dir);
+            List<ContentRoot> docFiles = TraverseDirectory(dir);
             Console.WriteLine("Found {0} documentation files", docFiles.Count);
 
-            //XPathExpression PropertyExpression = XPathExpression.Compile(@"//meta[starts-with(@name, 'N2:')]");
-            while (docFiles.Count > 0)
+            docFiles.ForEach(a => ProcessContentItem(a));
+
+            XmlSerializer xss = new XmlSerializer(typeof(List<ContentRoot>));
+            using (var txt = File.CreateText("n2data.xml"))
             {
-                string filename = docFiles[0];
-                docFiles.RemoveAt(0);
-                Console.WriteLine("Processing {0}", Path.GetFileName(filename));
-                XDocument doc = ReadXML(filename);
-                if (doc != null)
+                xss.Serialize(txt, docFiles);
+                txt.Close();
+            }
+
+//            Console.ReadKey();
+        }
+
+        static void ProcessContentItem(ContentRoot root)
+        {
+            // depth-first
+            root.ChildPages.ForEach(a => ProcessContentItem(a));
+
+            string filename = root.cfile;
+            if (String.IsNullOrWhiteSpace(filename))
+                return; // skip
+
+            if (Directory.Exists(filename))
+                return; // is a default contentitem
+
+            if (!File.Exists(filename))
+                return;
+
+
+            Console.WriteLine("Processing {0}", Path.GetFileName(filename));
+            XDocument doc = ReadXML(filename);
+            if (doc != null)
+            {
+                ParseOptions po = ReadOptions(doc);
+                root.Zones.AddRange(ReadZones(doc, po));
+
+                var titles = doc.Descendants("title").ToList();
+                if (titles.Count > 0)
+                    root.Title = titles.First().InnerXml();
+            }
+
+            root.cparsed = true;
+        }
+
+        private static ParseOptions ReadOptions(XDocument doc)
+        {
+            ParseOptions po = new ParseOptions();
+
+            var n2properties = from x in doc.Descendants("meta")
+                               let nameAttr = x.Attribute("name")
+                               where nameAttr != null && nameAttr.Value.StartsWith("N2:", StringComparison.OrdinalIgnoreCase)
+                               select new { name = nameAttr.Value, value = x.Attribute("content").Value };
+
+            foreach (var pi in n2properties)
+            {
+                Console.WriteLine("    name = {0}, value = {1}", pi.name, pi.value);
+
+                if (pi.name.Equals("N2:ZoneSelector", StringComparison.OrdinalIgnoreCase))
+                    po.ZoneClass = (pi.value);
+                else if (pi.name.Equals("N2:PartSelector", StringComparison.OrdinalIgnoreCase))
+                    po.PartClass = (pi.value);
+                else if (pi.name.Equals("N2:AttributeSelector", StringComparison.OrdinalIgnoreCase))
+                    po.AttributeClass = (pi.value);
+                else if (pi.name.Equals("N2:IgnoreSelector", StringComparison.OrdinalIgnoreCase))
+                    po.IgnoreClass = (pi.value);
+                else if (pi.name.Equals("N2:ShowNav", StringComparison.OrdinalIgnoreCase))
+                    po.ShowNav = bool.Parse(pi.value);
+                else if (pi.name.Equals("N2:ShowTitle", StringComparison.OrdinalIgnoreCase))
+                    po.ShowTitle = bool.Parse(pi.value);
+                else if (pi.name.Equals("N2:Type", StringComparison.OrdinalIgnoreCase))
+                    po.Type = pi.value;
+
+                //TODO: Handle N2:MapProperty
+
+            }
+            return po;
+        }
+
+        private static IEnumerable<Zone> ReadZones(XDocument doc, ParseOptions po)
+        {
+            // find zones 
+            List<Zone> zones = new List<Zone>();
+            List<XElement> xmlZones = doc.Descendants("div").Where(Jquery2Linq(po.ZoneClass)).ToList();
+
+            foreach (var zoneElement in xmlZones)
+            {
+                Zone z = new Zone();
+                z.Name = zoneElement.Attribute("id").Value;
+                if (zones.Any(a => a.Name.Equals(z.Name, StringComparison.OrdinalIgnoreCase)))
+                    throw new Exception("Duplicate zone");
+                zones.Add(z);
+                
+                // find parts within each zone 
+                List<XElement> xmlParts = zoneElement.Descendants("div").Where(Jquery2Linq(po.PartClass)).ToList();
+                foreach (var xmlPart in xmlParts)
                 {
-                    XPathNavigator docNavigator = doc.CreateNavigator();
-                    ParseOptions po = new ParseOptions();
+                    // find out the type of the part (second CSS class)
+                    var possibleTypes = GetLeftoverClasses(xmlPart.Attribute("class").Value, po.PartClass);
+                    if (possibleTypes.Count != 1)
+                        throw new Exception(string.Format("invalid css class: {0}", xmlPart.Attribute("class").Value));
 
-                    var n2properties = from x in doc.Descendants("meta")
-                                       let nameAttr = x.Attribute("name")
-                                       where nameAttr != null && nameAttr.Value.StartsWith("N2:", StringComparison.OrdinalIgnoreCase)
-                                       select new { name = nameAttr.Value, value = x.Attribute("content").Value };
+                    Part ppart = new Part();
 
-                    foreach (var pi in n2properties)
-                    {
-                        Console.WriteLine("name = {0}, value = {1}", pi.name, pi.value);
-
-                        if (pi.name.Equals("N2:ZoneSelector", StringComparison.OrdinalIgnoreCase))
-                            po.ZoneClass = (pi.value);
-                        else if (pi.name.Equals("N2:PartSelector", StringComparison.OrdinalIgnoreCase))
-                            po.PartClass = (pi.value);
-                        else if (pi.name.Equals("N2:AttributeSelector", StringComparison.OrdinalIgnoreCase))
-                            po.AttributeClass = (pi.value);
-                        else if (pi.name.Equals("N2:IgnoreSelector", StringComparison.OrdinalIgnoreCase))
-                            po.IgnoreClass = (pi.value);
-                        else if (pi.name.Equals("N2:ShowNav", StringComparison.OrdinalIgnoreCase))
-                            po.ShowNav = bool.Parse(pi.value);
-                        else if (pi.name.Equals("N2:ShowTitle", StringComparison.OrdinalIgnoreCase))
-                            po.ShowTitle = bool.Parse(pi.value);
-                        else if (pi.name.Equals("N2:Type", StringComparison.OrdinalIgnoreCase))
-                            po.Type = pi.value;
-
-                        //TODO: Handle N2:MapProperty
-
-                    }
-
-                    // find zones 
-                    List<XElement> Zones = doc.Descendants("div").Where(Jquery2Linq(po.ZoneClass)).ToList();
-                    foreach (var zone in Zones)
-                    {
-                        // find parts within each zone 
-                        List<XElement> Parts = zone.Descendants("div").Where(Jquery2Linq(po.PartClass)).ToList();
-                        foreach (var part in Parts)
+                        // find out each attribute of each part 
+                        foreach (var attr in xmlPart.Descendants("div").Where(Jquery2Linq(po.AttributeClass)))
                         {
-                            // find out the type of the part (second CSS class)
-                            var possibleTypes = GetLeftoverClasses(part.Attribute("class").Value, po.PartClass);
-                            if (possibleTypes.Count != 1)
-                                throw new Exception(string.Format("invalid css class: {0}", part.Attribute("class").Value));
+                            var possibleAttrs = GetLeftoverClasses(attr.Attribute("class").Value, po.AttributeClass);
+                            if (possibleAttrs.Count != 1)
+                                throw new Exception(string.Format("invalid css class: {0}", xmlPart.Attribute("class").Value));
 
-                            // find out each attribute of each part 
-                            List<XElement> Attrs = part.Descendants("div").Where(Jquery2Linq(po.AttributeClass)).ToList();
-                            foreach (var attr in Attrs)
+                            String attr_name = possibleAttrs[0];
+                            String attr_value = attr.InnerXml();
+
+                            // remove HTML comments
+                            attr_value = System.Text.RegularExpressions.Regex.Replace(attr_value, "<!--.*?-->", "", System.Text.RegularExpressions.RegexOptions.Singleline);
+                        
+                        
+                            ppart.Properties.Add(new PartAttribute()
                             {
-                                var possibleAttrs = GetLeftoverClasses(attr.Attribute("class").Value, po.AttributeClass);
-                                if (possibleAttrs.Count != 1)
-                                    throw new Exception(string.Format("invalid css class: {0}", part.Attribute("class").Value));
-
-                                String attr_name = possibleAttrs[0];
-                                String attr_value = attr.InnerXml();
-
-                                // remove HTML comments
-                                attr_value = System.Text.RegularExpressions.Regex.Replace(attr_value, "<!--.*?-->", "", System.Text.RegularExpressions.RegexOptions.Singleline);
-
-                                Console.WriteLine("=====> {0}.{1} = {2} ", possibleTypes[0], attr_name, attr_value);
-                            }
+                                Key = attr_name,
+                                Value = new CDATA(attr_value)
+                            });
+                            Console.WriteLine("    =====> {0}.{1} = {2} ", possibleTypes[0], attr_name, (attr_value.Length));
                         }
-                    }
+
+                    z.Parts.Add(ppart);
+
                 }
             }
-            Console.ReadKey();
+
+            return zones;
         }
+
+
+        
 
         private static List<string> GetLeftoverClasses(string input, string targetItem)
         {
@@ -189,17 +252,59 @@ namespace n2parser
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        private static List<string> GetFiles(string dir)
+        private static List<ContentRoot> TraverseDirectory(string dir)
         {
-            var docFiles = new List<string>();
-            List<string> docDirs = new List<string>() { dir };
-            while (docDirs.Count > 0)
+            var docFiles = new List<ContentRoot>();
+
+            // for this directory -- 
+
+            string[] files = Directory.GetFiles(dir);
+            ContentRoot page;
+
+            string[] rootPages = files.Where(a=> 
+                                                a.EndsWith("index.htm", StringComparison.OrdinalIgnoreCase) ||
+                                                a.EndsWith("index.html", StringComparison.OrdinalIgnoreCase) ||
+                                                a.EndsWith("@root.htm", StringComparison.OrdinalIgnoreCase) || 
+                                                a.EndsWith("@root.html", StringComparison.OrdinalIgnoreCase)
+                                            ).ToArray();
+            if (rootPages.Length > 1)
+                throw new Exception(String.Format("Ambiguous root pages in directory '{0}' : [{1}]", dir, 
+                    String.Join(", ", rootPages)));
+
+            string[] subdirectories = Directory.GetDirectories(dir);
+
+            if (rootPages.Length > 0)
             {
-                dir = docDirs[0];
-                docDirs.RemoveAt(0);
-                docFiles.AddRange(Directory.GetFiles(dir, "*.htm*"));
-                docDirs.AddRange(Directory.GetDirectories(dir));
+                // this is a root content-item (ignore sibiling items and assign any child dirs to this item)
+
+                ContentRoot pg = new ContentRoot() { cfile = rootPages[0] };
+                docFiles.Add(pg);
+
+                foreach (var subdirectory in subdirectories)
+                    pg.ChildPages.AddRange(TraverseDirectory(subdirectory));
             }
+            else
+            {
+                // each page is a non-root content-item; need to generate a dummy root for them
+
+                if (subdirectories.Length > 0)
+                    throw new Exception(String.Format("Directory {0} can't contain subdirectories because it doesn't have a root page", dir));
+
+                ContentRoot dummy = new ContentRoot() { cfile = dir  };
+                docFiles.Add(dummy);
+
+                foreach (var file in files.Where(a=> 
+                    a.EndsWith(".htm", StringComparison.OrdinalIgnoreCase) || 
+                    a.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+                    )
+
+                    dummy.ChildPages.Add(new ContentRoot() { cfile = file });
+
+                foreach (var subdirectory in subdirectories)
+                    dummy.ChildPages.AddRange(TraverseDirectory(subdirectory));
+
+            }
+
             return docFiles;
         }
 
@@ -216,14 +321,20 @@ namespace n2parser
                 var text = File.ReadAllText(filename);
                 if (text.Contains("&nbsp;"))
                 {
+                    var c = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("-> warning: fixing &nbsp; in xml");
+                    Console.ForegroundColor = c;
                     text = text.Replace("&nbsp;", "&#160;");
                 }
                 return XDocument.Load(new StringReader(text));
             }
             catch (Exception x)
             {
+                var c = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("-> failed to read file {1}: {0}", x.Message, filename);
+                Console.ForegroundColor = c;
                 return null;
             }
         }
